@@ -3,7 +3,7 @@ import { SlidePreviewModal } from "./components/SlidePreviewModal";
 import { UniversityPaperEditor } from "./components/UniversityPaperEditor";
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { BookOpen, GraduationCap, Upload, FileText, Presentation, FileQuestion, Download, Loader2, Shuffle, LogOut, AlertCircle, X, Camera, Clock, Trash2, RefreshCw, ExternalLink, Calendar, FileVideo, Sun, Moon, CheckCircle2, Workflow, ArrowRight, Sparkles, ChevronDown, Maximize2 , Play, Pause, Square, Volume2 , Check, Target, Activity } from "lucide-react";
+import { BookOpen, GraduationCap, Upload, FileText, Presentation, FileQuestion, Download, Loader2, Shuffle, LogOut, AlertCircle, X, Camera, Clock, Trash2, RefreshCw, ExternalLink, Calendar, FileVideo, Sun, Moon, CheckCircle2, Workflow, ArrowRight, Sparkles, ChevronDown, Maximize2 , Play, Pause, Square, Volume2 , Check, Target, Activity, LampDesk, BookMarked, Library, Sigma, Pi, Binary, Lightbulb, Layers, Video, Search, CheckCircle, Settings, ChevronLeft, ChevronRight, Menu, Bot, MessageCircle, CalendarDays, ScanText, CircleHelp, ListChecks } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -15,6 +15,7 @@ import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, User,
 import { doc, setDoc, serverTimestamp, getDoc, collection, addDoc, deleteDoc, query, orderBy, onSnapshot } from "firebase/firestore";
 import { VideoExplainer, VideoData } from "./components/VideoExplainer";
 import { UserProfile } from "./components/UserProfile";
+import { UserAccountPanel } from "./components/UserAccountPanel";
 import { AuthForm } from "./components/AuthForm";
 import { Chatbot } from "./components/Chatbot";
 
@@ -291,6 +292,26 @@ export default function App() {
   const [resultText, setResultText] = useState("");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [accountPanelOpen, setAccountPanelOpen] = useState(false);
+  const [accountPanelTab, setAccountPanelTab] = useState<"profile" | "security" | "about" | "logout">("profile");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("notivexa_sidebar_collapsed") !== "false";
+    } catch {
+      return true;
+    }
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem("notivexa_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
   const [pptTheme, setPptTheme] = useState<"academic" | "professional" | "minimalist" | "pastel">("academic");
   const [resultType, setResultType] = useState<"notes" | "assessment" | "question-bank" | "lesson-plan" | "video" | "ppt" | "exam-paper" | "">("");
   const [videoData, setVideoData] = useState<VideoData | null>(null);
@@ -687,37 +708,88 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className={`flex min-h-screen items-center justify-center font-sans transition-colors relative overflow-hidden ${isDarkMode ? "bg-[#131311] text-[#E0E0D5]" : "bg-[#FDFDFB] text-[#2D2D2A]"}`}>
+      <div className={`flex min-h-screen items-center justify-center font-sans transition-colors relative overflow-hidden ${isDarkMode ? "academic-workspace-dark text-[#E0E0D5]" : "academic-workspace-light text-[#2D2D2A]"}`}>
         
-        {/* Background Ambient Glows */}
-        <div className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[120px] pointer-events-none ${isDarkMode ? "bg-sky-900/20" : "bg-sky-200/40"}`}></div>
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[120px] pointer-events-none ${isDarkMode ? "bg-indigo-900/20" : "bg-indigo-200/40"}`}></div>
-        <div className={`absolute top-[30%] left-[50%] w-[40%] h-[40%] rounded-full blur-[100px] pointer-events-none ${isDarkMode ? "bg-violet-900/15" : "bg-violet-200/30"}`}></div>
+        {/* Professional Academic Watermark & Grid Metadata */}
+        <div className="absolute top-6 left-8 hidden md:flex items-center gap-2 select-none pointer-events-none opacity-40 text-[11px] font-mono tracking-wider uppercase">
+          <GraduationCap size={14} />
+          <span>Institutional Learning Portal &bull; ISO/IEC 23988 Compliant</span>
+        </div>
+        <div className="absolute bottom-6 right-8 hidden md:flex items-center gap-2 select-none pointer-events-none opacity-40 text-[11px] font-mono tracking-wider uppercase">
+          <span>Curriculum Engineering Engine v2.0</span>
+        </div>
 
-        <div className={`p-10 md:p-12 rounded-[32px] border text-center max-w-md w-full relative z-10 transition-colors backdrop-blur-xl ${
-          isDarkMode ? "bg-[#22221F]/80 border-[#383832] shadow-[0_8px_32px_rgba(0,0,0,0.5)]" : "bg-white/70 border-white/60 shadow-[0_8px_32px_rgba(90,90,64,0.08)]"
-        }
-`}>
+        {/* Subtle Drafting Precision Corner Marks */}
+        <div className="absolute top-6 right-8 hidden md:block select-none pointer-events-none opacity-30 text-xs font-mono">+</div>
+        <div className="absolute bottom-6 left-8 hidden md:block select-none pointer-events-none opacity-30 text-xs font-mono">+</div>
+
+        {/* Study Desk Reading Lamp in Login Background */}
+        <div className="absolute top-8 right-16 hidden md:flex flex-col items-center pointer-events-none select-none opacity-75">
+          <div className={`p-2.5 rounded-2xl border shadow-sm transition-colors ${
+            isDarkMode ? "bg-[#22221F] border-[#383832] text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.15)]" : "bg-white border-amber-200 text-amber-600 shadow-sm"
+          }`}>
+            <LampDesk size={28} />
+          </div>
+          <div className={`w-32 h-44 -mt-1 bg-gradient-to-b ${
+            isDarkMode ? "from-amber-400/20 via-amber-400/5 to-transparent blur-md" : "from-amber-300/30 via-amber-200/10 to-transparent blur-md"
+          } rounded-b-full`} />
+        </div>
+
+        {/* Academic Books Stack in Login Background */}
+        <div className="absolute bottom-10 left-12 hidden md:flex items-center gap-3 pointer-events-none select-none opacity-65">
+          <div className={`p-2.5 rounded-2xl border shadow-2xs ${
+            isDarkMode ? "bg-[#20201D] border-[#383832] text-indigo-400" : "bg-white border-slate-200 text-indigo-600"
+          }`}>
+            <Library size={26} />
+          </div>
+          <div className="font-mono text-[10px]">
+            <span className="block font-bold text-slate-700 dark:text-slate-300">ACADEMIC VOLUMES</span>
+            <span className="text-slate-400">Curriculum & Textbooks</span>
+          </div>
+        </div>
+
+        {/* Formal Logical Symbols Floating in Margins */}
+        <div className="absolute top-1/4 left-10 hidden lg:flex flex-col gap-2 font-mono text-xs text-slate-400/35 pointer-events-none select-none">
+          <span>∀x ∈ S</span>
+          <span>(P ⟹ Q)</span>
+          <span>A ∧ B ⟺ C</span>
+          <span>∴ Q.E.D.</span>
+        </div>
+        <div className="absolute bottom-1/4 right-10 hidden lg:flex flex-col items-end gap-2 font-mono text-xs text-slate-400/35 pointer-events-none select-none">
+          <span>∑ 1/n² = π²/6</span>
+          <span>∃y : y ∉ ∅</span>
+          <span>¬(A ∨ B)</span>
+          <span>∵ α ⊨ β</span>
+        </div>
+
+        <div className={`p-8 md:p-10 rounded-[32px] border text-center max-w-md w-full relative z-10 transition-colors backdrop-blur-xl my-8 ${
+          isDarkMode ? "bg-[#1E1E1B]/90 border-[#383832] shadow-[0_8px_32px_rgba(0,0,0,0.5)]" : "bg-white/90 border-slate-200/90 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
+        }`}>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             title={isDarkMode ? "Switch to Daylight Mode" : "Switch to Late-Night Study Dark Mode"}
             className={`absolute top-4 right-4 p-2.5 rounded-full border transition-all ${
               isDarkMode 
                 ? "bg-[#2D2D2A] border-[#4A4A3F] text-[#FACC15] hover:bg-[#383832]" 
-                : "bg-[#FAF9F6] border-[#E0E0D5] text-[#5A5A40] hover:bg-[#E8E8E0]"
-            }
-`}
+                : "bg-slate-50 border-slate-200 text-amber-600 hover:bg-slate-100"
+            }`}
           >
             {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <div className="w-20 h-20 mx-auto bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 rounded-[24px] shadow-xl shadow-sky-500/25 text-white flex items-center justify-center mb-6 transform hover:scale-105 transition-all">
-            <BookOpen size={36} />
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 mb-5">
+            <GraduationCap size={13} />
+            Academic Workspace
           </div>
-          <h1 className={`text-3xl font-bold font-serif mb-2 tracking-tight ${isDarkMode ? "text-[#F5F5F0]" : "text-slate-900"}`}>
-            Welcome to <br />Notivexa <span className="bg-gradient-to-r from-sky-500 to-violet-600 bg-clip-text text-transparent">AI</span>
+
+          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 rounded-[22px] shadow-lg shadow-indigo-500/25 text-white flex items-center justify-center mb-4 transform hover:scale-105 transition-all">
+            <BookOpen size={30} />
+          </div>
+          <h1 className={`text-2xl md:text-3xl font-bold font-serif mb-2 tracking-tight ${isDarkMode ? "text-[#F5F5F0]" : "text-slate-900"}`}>
+            Notivexa <span className="bg-gradient-to-r from-sky-500 to-violet-600 bg-clip-text text-transparent">AI 2.0</span>
           </h1>
-          <p className={`mb-8 text-sm leading-relaxed ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
-            Sign in to access AI-powered learning tools, generate notes, flashcards, and presentations instantly.
+          <p className={`mb-6 text-xs leading-relaxed ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+            Higher Education & Research Portal. Sign in to analyze curriculum texts, synthesize question papers, and produce interactive study materials.
           </p>
           <AuthForm isDarkMode={isDarkMode} />
           
@@ -2077,510 +2149,411 @@ export default function App() {
 
 
   return (
-    <div className={`flex h-screen font-sans transition-colors duration-300 ${isDarkMode ? "bg-[#131311] text-[#E0E0D5] dark" : "bg-gradient-to-br from-slate-50 via-sky-50/40 to-indigo-50/30 text-slate-800"}`}>
+    <div className={`flex h-screen font-sans transition-colors duration-300 ${isDarkMode ? "academic-workspace-dark text-[#E0E0D5] dark" : "academic-workspace-light text-slate-800"}`}>
       
-      {/* Sidebar (Streamlit style) */}
-      <div className={`w-72 border-r flex flex-col h-full z-10 transition-colors duration-300 ${
-        isDarkMode ? "bg-[#22221F] border-[#383832] text-[#E0E0D5] shadow-[0_4px_20px_rgba(0,0,0,0.3)]" : "bg-white/95 backdrop-blur-md border-slate-200/80 text-slate-800 shadow-[0_4px_25px_rgba(15,23,42,0.06)]"
-      }
-`}>
+      {/* Mobile Menu Backdrop */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-30 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Floating Mobile Menu Button */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="md:hidden fixed top-4 left-4 z-40 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md text-slate-700 dark:text-slate-200 cursor-pointer"
+        aria-label="Toggle navigation menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Hidden File Input for Sidebar Upload */}
+      <input
+        id="sidebar-file-upload-input"
+        type="file"
+        accept="application/pdf,image/*"
+        className="hidden"
+        onChange={handleUpload}
+      />
+
+      {/* ========================================================================= */}
+      {/* NOTIVEXA AI — ICON-ONLY COLLAPSED / EXPANDABLE SIDEBAR                     */}
+      {/* Default: 80px (w-20). Expanded: 288px (w-72). Full Height & Tooltips      */}
+      {/* ========================================================================= */}
+      <div className={`fixed md:relative inset-y-0 left-0 z-40 flex flex-col h-full transition-all duration-300 ease-in-out border-r shrink-0 select-none ${
+        sidebarCollapsed ? "w-20" : "w-72"
+      } ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      } ${
+        isDarkMode 
+          ? "bg-[#181816]/95 border-[#2D2D27] text-[#E0E0D5]" 
+          : "bg-white/95 backdrop-blur-md border-slate-200/80 text-slate-800 shadow-sm"
+      }`}>
         
-        {/* Fixed Header */}
-        <div className={`p-6 pb-4 border-b shrink-0 flex items-center justify-between transition-colors ${isDarkMode ? "border-[#383832]" : "border-slate-200/80"}`}>
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl transition-all ${isDarkMode ? "bg-[#2D2D2A] text-[#C2C2B0]" : "bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 text-white shadow-md shadow-sky-500/25"}`}>
+        {/* Collapse / Expand Floating Button (Edge of Sidebar) */}
+        <button
+          onClick={toggleSidebar}
+          title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          aria-label={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          className="hidden md:flex absolute -right-3 top-20 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 hover:border-indigo-400 shadow-md items-center justify-center z-50 cursor-pointer transition-all hover:scale-110"
+        >
+          {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+
+        {/* 1. TOP / LOGO SECTION */}
+        <div className={`h-20 shrink-0 border-b flex items-center transition-colors ${
+          isDarkMode ? "border-[#2D2D27]" : "border-slate-200/80"
+        } ${sidebarCollapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#4F46E5] to-[#7C3AED] text-white flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0 transform hover:scale-105 transition-transform">
               <BookOpen size={22} />
             </div>
-            <div>
-              <h1 className={`text-xl font-bold font-serif transition-colors ${isDarkMode ? "text-[#F5F5F0]" : "text-slate-900"}`}>
-                Notivexa <span className={`italic font-extrabold ${isDarkMode ? "text-[#C2C2B0]" : "bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"}`}>AI</span>
-              </h1>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold font-serif tracking-tight truncate text-slate-900 dark:text-white">
+                  Notivexa <span className="bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] bg-clip-text text-transparent italic font-black">AI</span>
+                </h1>
+                <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase block">Workspace</span>
+              </div>
+            )}
           </div>
-
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            title={isDarkMode ? "Switch to Daylight Mode" : "Switch to Late-Night Study Dark Mode"}
-            className={`p-2.5 rounded-full border transition-all flex items-center justify-center ${
-              isDarkMode 
-                ? "bg-[#2D2D2A] border-[#4A4A3F] text-[#FACC15] hover:bg-[#383832] shadow-sm" 
-                : "bg-white border-slate-200 text-amber-600 hover:bg-slate-50 shadow-xs"
-            }
-`}
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
         </div>
 
-        {/* Scrollable middle container */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0 custom-scrollbar">
+        {/* 2. SCROLLABLE MIDDLE NAVIGATION CONTAINER */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 min-h-0 custom-scrollbar">
           
-          {/* Late-Night Study Mode Quick Switch */}
-          <div className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
-            isDarkMode 
-              ? "bg-[#2A2A26] border-[#45453B]" 
-              : "bg-gradient-to-r from-sky-50/80 to-indigo-50/50 border-sky-200/60 shadow-xs"
-          }
-`}>
-            <div className="flex items-center gap-2.5">
-              <div className={`p-2 rounded-xl transition-colors ${isDarkMode ? "bg-[#383832] text-[#FACC15]" : "bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-xs"}`}>
-                {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
-              </div>
-              <div>
-                <span className={`text-xs font-bold block transition-colors ${isDarkMode ? "text-[#F5F5F0]" : "text-slate-800"}`}>
-                  {isDarkMode ? "Late-Night Mode" : "Daylight Mode"}
-                </span>
-                <span className="text-[10px] text-slate-500">Eye-soothing study contrast</span>
-              </div>
-            </div>
+          {/* GROUP 1: CORE SYNTHESIS ACTIONS */}
+          <div className="space-y-1.5">
+            {/* Generate Summary */}
             <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                isDarkMode ? "bg-[#5A5A40]" : "bg-sky-500"
-              }
-`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isDarkMode ? "translate-x-6" : "translate-x-1"
+              onClick={() => {
+                if (fileData) {
+                  generateNotes();
+                } else {
+                  setInputType("upload");
+                  document.getElementById("sidebar-file-upload-input")?.click();
                 }
-`}
-              />
+              }}
+              aria-label="Generate Summary"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                resultType === "notes"
+                  ? "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-md shadow-indigo-500/25 font-semibold"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <FileText size={20} strokeWidth={resultType === "notes" ? 2.2 : 1.8} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  Generate Summary
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  Generate Summary
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
+                </div>
+              )}
+            </button>
+
+            {/* Study Lesson Planner */}
+            <button
+              onClick={() => {
+                if (fileData) {
+                  generateLessonPlan();
+                } else {
+                  setInputType("upload");
+                  document.getElementById("sidebar-file-upload-input")?.click();
+                }
+              }}
+              aria-label="Study Lesson Planner"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                resultType === "lesson-plan"
+                  ? "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-md shadow-indigo-500/25 font-semibold"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <Calendar size={20} strokeWidth={resultType === "lesson-plan" ? 2.2 : 1.8} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  Study Lesson Planner
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  Study Lesson Planner
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
+                </div>
+              )}
+            </button>
+
+            {/* Generate Flashcards */}
+            <button
+              onClick={() => {
+                if (fileData) {
+                  generateFlashcards();
+                } else {
+                  setInputType("upload");
+                  document.getElementById("sidebar-file-upload-input")?.click();
+                }
+              }}
+              aria-label="Generate Flashcards"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                flashcards.length > 0
+                  ? "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-md shadow-indigo-500/25 font-semibold"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <Layers size={20} strokeWidth={flashcards.length > 0 ? 2.2 : 1.8} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  Generate Flashcards
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  Generate Flashcards
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
+                </div>
+              )}
             </button>
           </div>
 
-          {/* Study Material Source */}
-          <div>
-            <label className="text-xs font-semibold text-[#8A8A7A] uppercase tracking-widest mb-3 block">
-              Study Material Source
-            </label>
-            
-            {/* Custom Tabs */}
-            <div className={`flex p-1 rounded-full border mb-4 transition-colors ${isDarkMode ? "bg-[#282824] border-[#383832]" : "bg-slate-100/90 border-slate-200/80"}`}>
-              <button
-                onClick={() => {
+          {/* SUBTLE DIVIDER */}
+          <div className={`my-2 mx-1 h-[1px] ${isDarkMode ? "bg-[#2D2D27]" : "bg-slate-200/80"}`} />
+
+          {/* GROUP 2: ACADEMIC TOOLS & REPOSITORIES */}
+          <div className="space-y-1.5">
+            {/* Exam Paper & Question Bank */}
+            <button
+              onClick={() => {
+                if (fileData) {
+                  generateExamPaper();
+                } else {
                   setInputType("upload");
-                  setFile(null);
-                  setFileData(null);
+                  document.getElementById("sidebar-file-upload-input")?.click();
                 }
-}
-                className={`flex-1 py-2 px-1 rounded-full text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${inputType === "upload" ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md shadow-sky-500/20" : isDarkMode ? "text-[#A1A194] hover:text-[#E0E0D5]" : "text-slate-600 hover:text-slate-900"}`}
-              >
-                <Upload size={12} /> Upload File
-              </button>
-              <button
-                onClick={() => {
-                  setInputType("library");
-                  setFile(null);
-                  setFileData(null);
-                }
-}
-                className={`flex-1 py-2 px-1 rounded-full text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${inputType === "library" ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md shadow-sky-500/20" : isDarkMode ? "text-[#A1A194] hover:text-[#E0E0D5]" : "text-slate-600 hover:text-slate-900"}`}
-              >
-                <BookOpen size={12} /> E-Library
-              </button>
-              <button
-                onClick={() => {
-                  setInputType("scan");
-                  setFile(null);
-                  setFileData(null);
-                }
-}
-                className={`flex-1 py-2 px-1 rounded-full text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${inputType === "scan" ? "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md shadow-sky-500/20" : isDarkMode ? "text-[#A1A194] hover:text-[#E0E0D5]" : "text-slate-600 hover:text-slate-900"}`}
-              >
-                <Camera size={12} /> Scan Page
-              </button>
-            </div>
-
-            {/* Tab Contents */}
-            {inputType === "upload" && (
-              <label className={`border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group block ${
-                isDarkMode 
-                  ? "border-[#4A4A3F] bg-[#22221F] hover:bg-[#2A2A26]" 
-                  : "border-[#D1D1C4] bg-[#FAF9F6] hover:bg-[#F0F0E8]"
-              }
-`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${isDarkMode ? "bg-[#383832]" : "bg-[#E8E8E0]"}`}>
-                  <Upload className={`${isDarkMode ? "text-[#C2C2B0]" : "text-[#5A5A40]"} transition-colors`} size={16} />
+              }}
+              aria-label="Exam Paper and Question Bank"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                resultType === "exam-paper" || resultType === "question-bank" || resultType === "assessment"
+                  ? "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-md shadow-indigo-500/25 font-semibold"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <GraduationCap size={20} strokeWidth={resultType === "exam-paper" ? 2.2 : 1.8} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  Exam Paper & Question Bank
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  Exam Paper & Question Bank
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
                 </div>
-                <span className={`text-xs font-semibold ${isDarkMode ? "text-[#E0E0D5]" : "text-[#3A3A2F]"}`}>Choose E-Book or Scan</span>
-                <span className="text-[10px] text-[#8A8A7A] mt-1 truncate max-w-[180px]">{file ? file.name : "PDF, JPEG, or PNG (Limit 50MB)"}</span>
-                <input type="file" accept="application/pdf,image/*" className="hidden" onChange={handleUpload} />
-              </label>)}
+              )}
+            </button>
 
-            {inputType === "library" && (
-              <div className="space-y-4">
-                {/* Search Bar */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search books..."
-                    value={searchQuery ?? ""}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full text-xs bg-[#FAF9F6] border border-[#D1D1C4] rounded-xl pl-8 pr-3 py-2 text-[#3A3A2F] outline-none focus:border-[#5A5A40] transition-all font-sans"
-                  />
-                  <span className="absolute left-2.5 top-2.5 text-[#8A8A7A]">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                  </span>
+            {/* Upload Syllabus / PDF */}
+            <button
+              onClick={() => {
+                setInputType("upload");
+                document.getElementById("sidebar-file-upload-input")?.click();
+              }}
+              aria-label="Upload Syllabus"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                inputType === "upload" && !resultText && !flashcards.length
+                  ? "bg-indigo-50 dark:bg-indigo-950/50 text-[#4F46E5] dark:text-indigo-300 font-semibold border border-indigo-200/60 dark:border-indigo-800/50"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <Upload size={20} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  Upload Syllabus / PDF
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  Upload Syllabus / PDF
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
                 </div>
+              )}
+            </button>
 
-                {/* Department Filters Tab List */}
-                <div className="flex gap-1 overflow-x-auto pb-1.5 scrollbar-none scroll-smooth">
-                  {["All", "MCA", "BCA", "Engineering", "Pharmacy", "Commerce", "Science", "Arts"].map((dept) => {
-                    const isActive = selectedDept === dept;
-                    return (
-                      <button
-                        key={dept}
-                        onClick={() => setSelectedDept(dept)}
-                        className={`px-3 py-1 text-[10px] font-bold rounded-full transition-all shrink-0 border ${isActive ? "bg-[#5A5A40] border-[#5A5A40] text-white" : "bg-[#FAF9F6] border-[#E0E0D5] text-[#6A6A5A] hover:bg-[#E8E8E0]"}`}
-                      >
-                        {dept}
-                      </button>
-                    );
-                  })}
+            {/* University E-Library */}
+            <button
+              onClick={() => {
+                setInputType("library");
+              }}
+              aria-label="University E-Library"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center px-0" : "px-3.5 gap-3"
+              } ${
+                inputType === "library"
+                  ? "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-md shadow-indigo-500/25 font-semibold"
+                  : isDarkMode
+                  ? "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  : "text-slate-600 hover:text-[#4F46E5] hover:bg-[#EEF2FF]"
+              } hover:scale-[1.02] active:scale-[0.98]`}
+            >
+              <div className="shrink-0 flex items-center justify-center">
+                <Library size={20} strokeWidth={inputType === "library" ? 2.2 : 1.8} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="text-xs sm:text-sm font-medium truncate text-left flex-1">
+                  University E-Library
+                </span>
+              )}
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  University E-Library
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
                 </div>
+              )}
+            </button>
+          </div>
 
-                {/* Books Display Grid */}
-                <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
-                  {allLibraryBooks.filter(bk => {
-                    if (selectedDept !== "All" && bk.department !== selectedDept) return false;
+        </div>
 
-                    if (searchQuery.trim()) {
-                      const q = searchQuery.toLowerCase();
-                      return bk.title.toLowerCase().includes(q) || bk.author.toLowerCase().includes(q) || (bk.desc && bk.desc.toLowerCase().includes(q));
-                    }
-
-                    return true;
-                  }).length === 0 ? (
-                    <div className="p-6 text-center text-xs text-[#8A8A7A] bg-[#FAF9F6] rounded-xl border border-dashed border-[#D1D1C4]">
-                      No books found in this category.
-                    </div>
-                  ) : (
-                    allLibraryBooks.filter(bk => {
-                      if (selectedDept !== "All" && bk.department !== selectedDept) return false;
-
-                      if (searchQuery.trim()) {
-                        const q = searchQuery.toLowerCase();
-                        return bk.title.toLowerCase().includes(q) || bk.author.toLowerCase().includes(q) || (bk.desc && bk.desc.toLowerCase().includes(q));
-                      }
-
-                      return true;
-                    }).map((bk) => {
-                      const isSelected = fileData?.fileUri === bk.id || ((bk as any).fileUri && fileData?.fileUri === (bk as any).fileUri);
-                      
-                      // Department soft color tag
-                      let tagColor = "bg-gray-100 text-gray-700 border-gray-200";
-                      switch (bk.department) {
-                        case "MCA": tagColor = "bg-[#E2F0D9] text-[#385723] border-[#C5E0B4]"; break;
-                        case "BCA": tagColor = "bg-[#FFF2CC] text-[#7F6000] border-[#FFE699]"; break;
-                        case "Engineering": tagColor = "bg-[#DDEBF7] text-[#1F4E79] border-[#BDD7EE]"; break;
-                        case "Pharmacy": tagColor = "bg-[#F2F2F2] text-[#595959] border-[#D9D9D9]"; break;
-                        case "Commerce": tagColor = "bg-[#E2EFDA] text-[#375623] border-[#C6E0B4]"; break;
-                        case "Science": tagColor = "bg-[#E1D5E7] text-[#4C0099] border-[#D5E8D4]"; break;
-                        case "Arts": tagColor = "bg-[#FFF2CC] text-[#7F3F00] border-[#FFF2CC]"; break;
-                        default: tagColor = "bg-blue-50 text-blue-800 border-blue-200";
-                      }
-
-                      return (
-                        <div
-                          key={bk.id}
-                          className={`p-3 bg-[#FAF9F6] rounded-xl border transition-all text-left flex flex-col justify-between gap-2.5 relative ${isSelected ? "border-[#5A5A40] ring-1 ring-[#5A5A40] bg-[#FAF9F0]" : "border-[#E0E0D5] hover:border-[#5A5A40]"}`}
-                        >
-                          <div>
-                            <div className="flex justify-between items-start gap-2 mb-1">
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${tagColor}`}>
-                                {bk.department}
-                              </span>
-                            </div>
-                            <h4 className="text-xs font-bold text-[#3A3A2F] mt-1 leading-snug line-clamp-2">
-                              {bk.title}
-                            </h4>
-                            <p className="text-[10px] text-[#8A8A7A] mt-0.5">
-                              By {bk.author}
-                            </p>
-                            {bk.desc && (
-                              <p className="text-[10px] text-[#6A6A5A] mt-1.5 leading-relaxed line-clamp-3 italic">
-                                "{bk.desc}"
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="flex gap-1.5 items-center mt-1">
-                            <button
-                              onClick={() => {
-                                setFileData({ fileUri: (bk as any).fileUri || bk.id, mimeType: (bk as any).mimeType || "text/plain" });
-                                setFile(new File([], `[Library Book] ${bk.title}`));
-                                setResultText("");
-                                setResultType("");
-                                setFlashcards([]);
-                              }}
-                              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all text-center ${isSelected ? "bg-[#5A5A40] text-white shadow-sm" : "border border-[#5A5A40] text-[#5A5A40] hover:bg-[#FAF9F0]"}`}
-                            >
-                              {isSelected ? "📖 Selected for Study" : "📖 Study Book"}
-                            </button>
-                            
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const textContent = `
-=========================================
-STUDY BOOK COMPANION: ${bk.title.toUpperCase()}
-Author: ${bk.author}
-Department: ${bk.department}
-=========================================
-
-Description:
-${bk.desc || 'No description available.'}
-
-This study companion has been successfully downloaded from your Notivexa AI Portal! You can upload it to the study panel anytime to generate notes, assessment tests, presentations, syllabus plans, and study guides.
-                                `;
-                                const blob = new Blob([textContent], { type: "text/plain" });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = `${bk.title.replace(/[^a-zA-Z0-9]/g, "_")}_Companion.txt`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                              }}
-                              className="py-1.5 px-2 border border-[#8A8A7A] text-[#8A8A7A] hover:text-[#5A5A40] hover:border-[#5A5A40] rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-0.5 shrink-0"
-                              title="Download study companion text"
-                            >
-                              <Download size={11} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+        {/* 3. BOTTOM SECTION: SETTINGS, THEME & USER PROFILE */}
+        <div className={`p-3 shrink-0 border-t flex flex-col gap-1.5 transition-colors ${
+          isDarkMode ? "border-[#2D2D27] bg-[#161614]/60" : "border-slate-200/80 bg-slate-50/50"
+        }`}>
+          
+          {/* Settings */}
+          <button
+            onClick={() => {
+              setAccountPanelTab("profile");
+              setAccountPanelOpen(true);
+            }}
+            aria-label="Settings"
+            className={`group relative w-full h-10 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+              sidebarCollapsed ? "justify-center" : "px-3 gap-3"
+            } ${
+              isDarkMode
+                ? "text-slate-400 hover:text-white hover:bg-slate-800/80"
+                : "text-slate-500 hover:text-indigo-600 hover:bg-[#EEF2FF]"
+            }`}
+          >
+            <Settings size={18} />
+            {!sidebarCollapsed && (
+              <span className="text-xs font-medium truncate">Settings</span>
+            )}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                Settings
+                <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
               </div>
             )}
+          </button>
 
-            {inputType === "scan" && (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsScannerOpen(true);
-                    startCamera();
-                  }
-}
-                  className="w-full bg-[#5A5A40] hover:bg-opacity-90 text-white py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
-                >
-                  <Camera size={14} /> Open Live Page Scanner
-                </button>
-                {file && file.name.startsWith("scan-") && (
-                  <div className="p-3 bg-[#FAF9F6] rounded-xl border border-[#E0E0D5] text-left flex items-center justify-between">
-                    <div className="overflow-hidden mr-2">
-                      <p className="text-[9px] font-bold text-[#5A5A40] uppercase tracking-wider">Active Scan</p>
-                      <p className="text-xs text-[#3A3A2F] truncate mt-0.5">{file.name}</p>
-                    </div>
-                    <button
-                      onClick={() => { setFile(null); setFileData(null); }}
-                      className="text-[#8A8A7A] hover:text-[#5A5A40] p-1 rounded-full hover:bg-[#F0F0E8] transition-colors shrink-0"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>)}
-              </div>)}
-          </div>
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            aria-label="Toggle theme"
+            className={`group relative w-full h-10 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+              sidebarCollapsed ? "justify-center" : "px-3 gap-3"
+            } ${
+              isDarkMode
+                ? "text-amber-400 hover:bg-slate-800/80"
+                : "text-slate-500 hover:text-amber-500 hover:bg-amber-50/70"
+            }`}
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {!sidebarCollapsed && (
+              <span className="text-xs font-medium truncate">
+                {isDarkMode ? "Daylight Mode" : "Late-Night Mode"}
+              </span>
+            )}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                Toggle theme
+                <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
+              </div>
+            )}
+          </button>
 
-
-
-          {/* Study Focus */}
-          <div>
-            <label className="text-xs font-semibold text-[#8A8A7A] uppercase tracking-widest mb-3 block">
-              Study Focus / Custom Prompt
-            </label>
-            <textarea
-              value={focusArea ?? ""}
-              onChange={(e) => setFocusArea(e.target.value)}
-              placeholder="e.g. Algorithms, step-by-step processes, and diagrams in student style"
-              className="w-full text-xs bg-[#FAF9F6] border border-[#D1D1C4] rounded-xl p-3 text-[#3A3A2F] outline-none focus:border-[#5A5A40] focus:ring-1 focus:ring-[#5A5A40] transition-all resize-none h-20 font-sans"
-            />
-          </div>
-
-          {/* Actions */}
-          <div>
-            <label className="text-xs font-semibold text-[#8A8A7A] uppercase tracking-widest mb-3 block">
-              Actions
-            </label>
-            
-            <div className="space-y-3">
-              {mode === "student" ? (
-                <>
-                  
-                  <button
-                    onClick={generateNotes}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 hover:from-sky-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-sky-500/20 hover:shadow-sky-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "notes" ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-                    Generate Summary
-                  </button>
-                  <button
-                    onClick={generateLessonPlan}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 hover:from-indigo-700 hover:to-violet-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "lesson-plan" ? <Loader2 size={16} className="animate-spin" /> : <Calendar size={16} />}
-                    Generate Study Lesson Planner
-                  </button>
-                  <button
-                    onClick={generateFlashcards}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "flashcards" ? <Loader2 size={16} className="animate-spin" /> : <BookOpen size={16} />}
-                    Generate Flashcards
-                  </button>
-                  <div className={`p-4 rounded-2xl space-y-3.5 shadow-sm mt-3 border transition-colors ${isDarkMode ? "bg-[#282824] border-[#383832]" : "bg-gradient-to-br from-white via-emerald-50/60 to-teal-50/40 border-emerald-200/90 shadow-emerald-500/5"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className={`flex items-center gap-2 ${isDarkMode ? "text-[#C2C2B0]" : "text-[#5A5A40]"}`}>
-                        <GraduationCap size={18} className="text-[#059669]" />
-                        <span className={`font-serif text-sm font-bold ${isDarkMode ? "text-[#F5F5F0]" : "text-[#3A3A2F]"}`}>
-                          Exam Paper & Question Bank
-                        </span>
-                      </div>
-                    </div>
-                    
-                                        <div className="space-y-3">
-                      <div className="p-3 rounded-2xl border border-[#D1D1C4] dark:border-[#383832] space-y-3">
-                        <label className={`block text-xs font-semibold ${isDarkMode ? "text-[#A1A194]" : "text-[#8A8A7A]"}`}>
-                          Question Bank Generator
-                        </label>
-                        <select 
-                          value={questionBankType} 
-                          onChange={(e) => setQuestionBankType(e.target.value)}
-                          className={`w-full p-2.5 rounded-xl border text-xs focus:ring-2 focus:ring-[#059669]/20 transition-all outline-none ${isDarkMode ? "bg-[#22221F] border-[#383832] text-[#E0E0D5]" : "bg-white border-[#E0E0D5] text-[#3A3A2F]"}`}
-                        >
-                          <option value="all">All Types (50+ each)</option>
-                          <option value="mcq">Multiple Choice (50+ MCQs)</option>
-                          <option value="short">Short Answer (50+ Questions)</option>
-                          <option value="long">Long Answer (50+ Questions)</option>
-                        </select>
-                        <button
-                          onClick={generateQuestionBank}
-                          disabled={!fileData || loading}
-                          className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          {loading && generatingType === "question-bank" ? <Loader2 size={14} className="animate-spin" /> : <GraduationCap size={14} />}
-                          Generate Question Bank
-                        </button>
-                      </div>
-
-                      <div className="p-3 rounded-2xl border border-[#D1D1C4] dark:border-[#383832] space-y-3 bg-gradient-to-br from-blue-50/30 to-indigo-50/30 dark:from-blue-900/10 dark:to-indigo-900/10">
-                        <label className={`block text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400`}>
-                          Exam Question Paper
-                        </label>
-                        <select 
-                          value={examPaperType} 
-                          onChange={(e) => setExamPaperType(e.target.value)}
-                          className={`w-full p-2.5 rounded-xl border text-xs focus:ring-2 focus:ring-blue-600/20 transition-all outline-none ${isDarkMode ? "bg-[#22221F] border-[#383832] text-[#E0E0D5]" : "bg-white border-[#E0E0D5] text-[#3A3A2F]"}`}
-                        >
-                          <option value="paper-full">Full Paper (MCQs, Short 2/3/4m, Long 5/8/10m)</option>
-                          <option value="paper-mcq">MCQ Paper (1 Mark each)</option>
-                          <option value="paper-short">Short Q's Paper (2, 3, 4 Marks)</option>
-                          <option value="paper-long">Long Q's Paper (5, 8, 10 Marks)</option>
-                          <option value="paper-university">University Format (CO/BT Mapped)</option>
-                        </select>
-                        {examPaperType === "paper-university" && (
-                          <div className="mt-2">
-                            <label className={`block text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1`}>
-                              Total Marks
-                            </label>
-                            <select
-                              value={universityMarks}
-                              onChange={(e) => setUniversityMarks(Number(e.target.value))}
-                              className={`w-full p-2.5 rounded-xl border text-xs focus:ring-2 focus:ring-blue-600/20 transition-all outline-none ${isDarkMode ? "bg-[#22221F] border-[#383832] text-[#E0E0D5]" : "bg-white border-[#E0E0D5] text-[#3A3A2F]"}`}
-                            >
-                              <option value={10}>10 Marks</option>
-                              <option value={20}>20 Marks</option>
-                              <option value={50}>50 Marks</option>
-                              <option value={60}>60 Marks</option>
-                              <option value={75}>75 Marks</option>
-                              <option value={80}>80 Marks</option>
-                              <option value={100}>100 Marks</option>
-                            </select>
-                          </div>
-                        )}
-                        <button
-                          onClick={generateExamPaper}
-                          disabled={!fileData || loading}
-                          className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          {loading && generatingType === "exam-paper" ? <Loader2 size={14} className="animate-spin" /> : <FileQuestion size={14} />}
-                          Generate Exam Paper
-                        </button>
-                      </div>
-                    </div>
+          {/* User Profile */}
+          {user && (
+            <button
+              onClick={() => {
+                setAccountPanelTab("profile");
+                setAccountPanelOpen(true);
+              }}
+              aria-label="User profile"
+              className={`group relative w-full h-11 rounded-xl transition-all duration-200 flex items-center cursor-pointer ${
+                sidebarCollapsed ? "justify-center" : "px-2.5 gap-2.5"
+              } ${
+                isDarkMode ? "hover:bg-slate-800/80" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="relative shrink-0">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : "U"}
                   </div>
-                  <button
-                    onClick={generatePPT}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-700 hover:from-pink-700 hover:to-rose-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-pink-500/20 hover:shadow-pink-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "ppt" ? <Loader2 size={16} className="animate-spin" /> : <Presentation size={16} />}
-                    Generate PPT
-                  </button>
-                  <button
-                    onClick={generateVideoExplanation}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-violet-700 hover:from-violet-700 hover:to-purple-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-violet-500/20 hover:shadow-violet-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "video" ? <Loader2 size={16} className="animate-spin" /> : <FileVideo size={16} />}
-                    Generate Smart Video Lecture
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={generateAssessment}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 hover:from-sky-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-sky-500/20 hover:shadow-sky-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "assessment" ? <Loader2 size={16} className="animate-spin" /> : <FileQuestion size={16} />}
-                    Create Question Paper
-                  </button>
-                  <button
-                    onClick={generateLessonPlan}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 hover:from-indigo-700 hover:to-violet-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "lesson-plan" ? <Loader2 size={16} className="animate-spin" /> : <Calendar size={16} />}
-                    Create Study Lesson Planner
-                  </button>
-                  <button
-                    onClick={generatePPT}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-pink-600 via-rose-600 to-pink-700 hover:from-pink-700 hover:to-rose-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-pink-500/20 hover:shadow-pink-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "ppt" ? <Loader2 size={16} className="animate-spin" /> : <Presentation size={16} />}
-                    Generate PPT
-                  </button>
-                  <button
-                    onClick={generateVideoExplanation}
-                    disabled={!fileData || loading}
-                    className="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-violet-700 hover:from-violet-700 hover:to-purple-800 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-4 rounded-full text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md shadow-violet-500/20 hover:shadow-violet-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    {loading && generatingType === "video" ? <Loader2 size={16} className="animate-spin" /> : <FileVideo size={16} />}
-                    Generate Smart Video Lecture
-                  </button>
-
-                </>
+                )}
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-white dark:border-[#161614] rounded-full" />
+              </div>
+              {!sidebarCollapsed && (
+                <div className="min-w-0 text-left flex-1 pr-1">
+                  <span className={`text-xs font-bold block truncate ${isDarkMode ? "text-[#E0E0D5]" : "text-slate-800"}`}>
+                    {user.displayName || user.email?.split("@")[0] || "Student"}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block truncate">
+                    Active Account
+                  </span>
+                </div>
               )}
-            </div>
-          </div>
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-[#0F172A] text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                  {user.displayName || user.email || "User profile"}
+                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-[#0F172A]" />
+                </div>
+              )}
+            </button>
+          )}
+
         </div>
       </div>
-      {/* Main Content Area */}
-      <div className={`flex-1 overflow-auto p-8 relative transition-colors duration-300 ${isDarkMode ? "bg-[#181816]" : "bg-[#F5F5F0]"}`}>
+{/* Main Content Area */}
+      <div className={`flex-1 overflow-auto p-8 relative transition-colors duration-300 ${isDarkMode ? "academic-workspace-dark text-[#E0E0D5]" : "academic-workspace-light text-slate-800"}`}>
         <div className="absolute top-4 right-4 z-20">
-          <UserProfile user={user} isDarkMode={isDarkMode} />
+          <UserProfile user={user} isDarkMode={isDarkMode} onSignOut={handleSignOut} />
         </div>
         <div className="mb-8 relative z-10">
           <Chatbot fileUri={fileData?.fileUri} mimeType={fileData?.mimeType} isDarkMode={isDarkMode} embedded={false} />
@@ -2627,75 +2600,610 @@ This study companion has been successfully downloaded from your Notivexa AI Port
             </motion.div>)}
 
           {!resultText && !flashcards.length && !videoData && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center overflow-hidden bg-gradient-to-br from-indigo-50/60 via-white to-sky-50/60 z-0">
-              {/* Scattered Vector Open Book Illustrations & Academic Symbols matching reference design */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden select-none -z-10">
-                {/* Top Left Book */}
-                <div className="absolute top-12 left-12 -rotate-12 transform hover:scale-105 transition-transform duration-500 opacity-45 text-indigo-400/80 p-4 bg-white/70 rounded-2xl shadow-xs backdrop-blur-xs flex items-center justify-center">
-                  <BookOpen size={56} strokeWidth={1.5} />
-                </div>
-                {/* Top Right Book */}
-                <div className="absolute top-16 right-16 rotate-12 transform hover:scale-105 transition-transform duration-500 opacity-45 text-sky-500/80 p-4 bg-white/70 rounded-2xl shadow-xs backdrop-blur-xs flex items-center justify-center">
-                  <BookOpen size={64} strokeWidth={1.5} />
-                </div>
-                {/* Bottom Left Book */}
-                <div className="absolute bottom-16 left-16 rotate-6 transform hover:scale-105 transition-transform duration-500 opacity-45 text-violet-500/80 p-5 bg-white/70 rounded-2xl shadow-xs backdrop-blur-xs flex items-center justify-center">
-                  <BookOpen size={72} strokeWidth={1.5} />
-                </div>
-                {/* Bottom Right Book */}
-                <div className="absolute bottom-12 right-20 -rotate-6 transform hover:scale-105 transition-transform duration-500 opacity-45 text-indigo-500/80 p-5 bg-white/70 rounded-2xl shadow-xs backdrop-blur-xs flex items-center justify-center">
-                  <BookOpen size={72} strokeWidth={1.5} />
-                </div>
-                {/* Mid Right Book */}
-                <div className="absolute top-1/2 right-10 rotate-15 transform -translate-y-1/2 opacity-35 text-sky-400/80 p-3 bg-white/60 rounded-2xl shadow-xs backdrop-blur-xs">
-                  <BookOpen size={48} strokeWidth={1.5} />
-                </div>
-                {/* Mid Left Book */}
-                <div className="absolute top-1/2 left-8 -rotate-12 transform -translate-y-1/2 opacity-35 text-indigo-400/80 p-3 bg-white/60 rounded-2xl shadow-xs backdrop-blur-xs">
-                  <BookOpen size={44} strokeWidth={1.5} />
-                </div>
-                {/* Additional floating book symbols and academic accents */}
-                <div className="absolute top-28 left-48 text-indigo-300 font-bold opacity-60 text-lg">+</div>
-                <div className="absolute top-36 right-44 text-sky-400 font-bold opacity-60 text-lg">+</div>
-                <div className="absolute bottom-36 left-40 text-violet-400 font-bold opacity-60 text-lg">+</div>
-                <div className="absolute top-24 left-1/3 text-2xl opacity-20">📖</div>
-                <div className="absolute bottom-28 right-1/3 text-2xl opacity-20">📚</div>
-                <div className="absolute top-1/3 right-24 w-2 h-2 rounded-full bg-sky-400 opacity-40"></div>
-                <div className="absolute bottom-1/3 left-24 w-3 h-3 rounded-full bg-indigo-400 opacity-30"></div>
-              </div>
+            <div className={`absolute inset-0 overflow-y-auto p-6 sm:p-8 lg:p-12 z-0 transition-colors custom-scrollbar ${
+              isDarkMode ? "academic-workspace-dark text-[#E0E0D5]" : "academic-workspace-light text-slate-800"
+            }`}>
+              
+              {/* ========================================================================= */}
+              {/* CONDITIONAL VIEW: UNIVERSITY E-LIBRARY (ARCHITECTURAL ENVIRONMENT)       */}
+              {/* ========================================================================= */}
+              {inputType === "library" ? (
+                <div className="relative min-h-full rounded-3xl overflow-hidden border border-amber-900/10 dark:border-amber-500/10 shadow-2xl bg-[#FDFBF7] dark:bg-[#0C101A]">
+                  
+                  {/* ========================================================================= */}
+                  {/* REALISTIC MODERN UNIVERSITY LIBRARY & AI ENVIRONMENT (MULTI-LAYER DEPTH) */}
+                  {/* ========================================================================= */}
+                  <div className="absolute inset-0 pointer-events-none select-none overflow-hidden -z-0">
+                    
+                    {/* --- DEPTH LAYER 1 (FAR BACKGROUND): ARCHITECTURAL WALLS, WINDOWS & DAYLIGHT --- */}
+                    {/* Dark Navy Accent Wall + Cream/Ivory Header Wall */}
+                    <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#0F172A] via-[#1E293B] to-transparent opacity-95 dark:opacity-98" />
+                    
+                    {/* Natural Daylight Arched Windows (Left & Right Background) */}
+                    <div className="absolute top-4 left-10 hidden xl:flex gap-4 opacity-40 dark:opacity-20">
+                      <div className="w-16 h-28 rounded-t-full border border-sky-200/60 bg-gradient-to-b from-sky-100/50 via-blue-50/20 to-transparent relative overflow-hidden">
+                        <div className="absolute inset-x-0 top-1/2 h-[1px] bg-sky-200/40" />
+                        <div className="absolute inset-y-0 left-1/2 w-[1px] bg-sky-200/40" />
+                      </div>
+                      <div className="w-16 h-28 rounded-t-full border border-sky-200/60 bg-gradient-to-b from-sky-100/50 via-blue-50/20 to-transparent relative overflow-hidden">
+                        <div className="absolute inset-x-0 top-1/2 h-[1px] bg-sky-200/40" />
+                        <div className="absolute inset-y-0 left-1/2 w-[1px] bg-sky-200/40" />
+                      </div>
+                    </div>
 
-              {/* Floating ambient glow effect */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-sky-400/15 via-indigo-400/15 to-violet-400/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div className="absolute top-4 right-10 hidden xl:flex gap-4 opacity-40 dark:opacity-20">
+                      <div className="w-16 h-28 rounded-t-full border border-sky-200/60 bg-gradient-to-b from-sky-100/50 via-blue-50/20 to-transparent relative overflow-hidden">
+                        <div className="absolute inset-x-0 top-1/2 h-[1px] bg-sky-200/40" />
+                        <div className="absolute inset-y-0 left-1/2 w-[1px] bg-sky-200/40" />
+                      </div>
+                      <div className="w-16 h-28 rounded-t-full border border-sky-200/60 bg-gradient-to-b from-sky-100/50 via-blue-50/20 to-transparent relative overflow-hidden">
+                        <div className="absolute inset-x-0 top-1/2 h-[1px] bg-sky-200/40" />
+                        <div className="absolute inset-y-0 left-1/2 w-[1px] bg-sky-200/40" />
+                      </div>
+                    </div>
 
-              <div className="w-20 h-20 bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 rounded-[28px] shadow-xl shadow-sky-500/25 text-white flex items-center justify-center mb-6 transform hover:scale-105 transition-all">
-                <BookOpen size={38} />
-              </div>
+                    {/* Minimal Linear Pendant Ceiling Lighting */}
+                    <div className="absolute top-0 left-1/4 w-[1px] h-10 bg-slate-400/40" />
+                    <div className="absolute top-10 left-[calc(25%-18px)] w-9 h-1.5 rounded-full bg-amber-200/90 shadow-[0_0_12px_rgba(251,191,36,0.8)]" />
+                    
+                    <div className="absolute top-0 right-1/4 w-[1px] h-10 bg-slate-400/40" />
+                    <div className="absolute top-10 right-[calc(25%-18px)] w-9 h-1.5 rounded-full bg-amber-200/90 shadow-[0_0_12px_rgba(251,191,36,0.8)]" />
 
-              <h2 className="text-3xl md:text-5xl font-bold font-serif text-slate-900 mb-3 tracking-tight">
-                Welcome to <span className="bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">Notivexa AI</span>
-              </h2>
-              <p className="text-slate-600 text-sm md:text-base max-w-xl mb-8 leading-relaxed">
-                Your intelligent multi-modal academic companion. Generate interactive presentations, handwritten notes, flashcards, and video explainers instantly.
-              </p>
+                    {/* Architectural Vertical Wood Slat Panels on Flanks */}
+                    <div className="absolute top-0 bottom-0 left-0 w-10 sm:w-16 opacity-30 dark:opacity-15 bg-[repeating-linear-gradient(90deg,#78350F_0,#78350F_4px,transparent_4px,transparent_14px)]" />
+                    <div className="absolute top-0 bottom-0 right-0 w-10 sm:w-16 opacity-30 dark:opacity-15 bg-[repeating-linear-gradient(90deg,#78350F_0,#78350F_4px,transparent_4px,transparent_14px)]" />
 
-              {/* Quick Feature Badges */}
-              <div className="flex flex-wrap justify-center gap-3 max-w-xl mb-8">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/90 border border-sky-200/80 shadow-xs text-xs font-semibold text-slate-700 backdrop-blur-sm">
-                  <Presentation size={15} className="text-sky-600" /> AI PowerPoint Studio
+                    {/* WALL DESIGN: TASTEFUL ACADEMIC GRAPHICS & MINIMAL ICONS */}
+                    <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center text-white select-none z-0">
+                      <div className="flex items-center justify-center gap-3 text-xs sm:text-sm font-mono tracking-[0.35em] uppercase font-bold text-amber-100/70">
+                        <BookOpen size={14} className="text-amber-300" />
+                        <span>READ &bull; LEARN &bull; GROW</span>
+                        <GraduationCap size={14} className="text-indigo-300" />
+                      </div>
+                      <div className="flex items-center justify-center gap-3 mt-1.5 text-[10px] sm:text-xs text-slate-300/60 font-serif italic tracking-wide">
+                        <Lightbulb size={12} className="text-amber-400/70 inline" />
+                        <span>Knowledge is the key to a brighter future &bull; Explore &bull; Discover &bull; Achieve</span>
+                        <Workflow size={12} className="text-cyan-400/70 inline" />
+                      </div>
+                    </div>
+
+                    {/* --- DEPTH LAYER 2 (MIDDLEGROUND): FLOOR-TO-CEILING BOOKSHELVES & WARM LEDS --- */}
+                    <div className="absolute top-24 left-14 right-14 h-48 border-b-4 border-amber-900/30 hidden md:flex items-end justify-between px-6 opacity-35 dark:opacity-25">
+                      
+                      {/* Bookshelf Section A (Left) */}
+                      <div className="flex items-end gap-1.5 pb-0.5">
+                        <div className="w-3.5 h-28 bg-[#854D0E] rounded-t-xs shadow-inner flex flex-col justify-around py-1 px-0.5"><div className="h-0.5 bg-amber-300/40" /></div>
+                        <div className="w-4 h-32 bg-[#1E3A8A] rounded-t-xs shadow-inner flex flex-col justify-around py-1 px-0.5"><div className="h-0.5 bg-amber-300/40" /></div>
+                        <div className="w-3 h-24 bg-[#065F46] rounded-t-xs" />
+                        <div className="w-4.5 h-30 bg-[#991B1B] rounded-t-xs" />
+                        <div className="w-3 h-26 bg-[#4C1D95] rounded-t-xs" />
+                        <div className="w-4 h-34 bg-[#78350F] rounded-t-xs" />
+                      </div>
+
+                      {/* Indoor Botanical Potted Plant (Monstera / Ficus Silhouette) */}
+                      <div className="flex flex-col items-center pb-0.5">
+                        <div className="flex items-center -space-x-1.5">
+                          <div className="w-5 h-7 rounded-full bg-emerald-600/70 -rotate-25 transform origin-bottom" />
+                          <div className="w-6 h-9 rounded-full bg-emerald-700/80 -rotate-5 transform origin-bottom" />
+                          <div className="w-5 h-7 rounded-full bg-emerald-600/70 rotate-25 transform origin-bottom" />
+                        </div>
+                        <div className="w-7 h-6 rounded-b-md bg-amber-800/80 border-t-2 border-amber-900" />
+                      </div>
+
+                      {/* Bookshelf Section B (Center-Right) */}
+                      <div className="flex items-end gap-1.5 pb-0.5">
+                        <div className="w-4 h-32 bg-[#312E81] rounded-t-xs" />
+                        <div className="w-3.5 h-28 bg-[#B45309] rounded-t-xs" />
+                        <div className="w-3 h-22 bg-[#0F766E] rounded-t-xs" />
+                        <div className="w-4.5 h-36 bg-[#831843] rounded-t-xs" />
+                        <div className="w-3 h-26 bg-[#1F2937] rounded-t-xs" />
+                      </div>
+
+                      {/* Minimalist Study Desk & Chair Outline (Foreground Furniture) */}
+                      <div className="hidden lg:flex flex-col items-end pb-0.5 opacity-60">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-5 rounded-t-md border border-amber-600 bg-amber-700/40" />
+                          <div className="w-16 h-1.5 bg-amber-800 rounded-xs" />
+                        </div>
+                        <div className="flex justify-between w-16 px-1">
+                          <div className="w-0.5 h-6 bg-slate-500" />
+                          <div className="w-0.5 h-6 bg-slate-500" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Warm LED Shelf Lighting Horizon & Glow */}
+                    <div className="absolute top-44 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-amber-300/50 dark:via-amber-400/25 to-transparent blur-[2px]" />
+                    <div className="absolute top-44 left-1/4 right-1/4 h-12 bg-gradient-to-b from-amber-300/15 via-amber-200/5 to-transparent blur-md pointer-events-none" />
+
+                    {/* --- DEPTH LAYER 3: SUBTLE AI / DIGITAL NETWORK PARTICLES --- */}
+                    <svg className="absolute inset-0 w-full h-full opacity-20 dark:opacity-15" xmlns="http://www.w3.org/2000/svg">
+                      <line x1="15%" y1="20%" x2="28%" y2="35%" stroke="#6366F1" strokeWidth="0.75" strokeDasharray="3 3" />
+                      <line x1="28%" y1="35%" x2="42%" y2="25%" stroke="#06B6D4" strokeWidth="0.75" strokeDasharray="3 3" />
+                      <line x1="70%" y1="22%" x2="82%" y2="32%" stroke="#7C3AED" strokeWidth="0.75" strokeDasharray="3 3" />
+                      <circle cx="15%" cy="20%" r="2" fill="#6366F1" />
+                      <circle cx="28%" cy="35%" r="2.5" fill="#06B6D4" />
+                      <circle cx="42%" cy="25%" r="2" fill="#818CF8" />
+                      <circle cx="70%" cy="22%" r="2.5" fill="#A855F7" />
+                      <circle cx="82%" cy="32%" r="2" fill="#06B6D4" />
+                    </svg>
+
+                    {/* Ambient Daylight & Soft Atmosphere Glow */}
+                    <div className="absolute top-0 right-1/4 w-[450px] h-[350px] bg-gradient-to-b from-amber-100/30 via-sky-100/20 to-transparent dark:from-indigo-950/20 rounded-full blur-[90px]" />
+                    <div className="absolute bottom-6 left-1/4 w-[450px] h-[350px] bg-gradient-to-t from-blue-100/25 via-indigo-100/15 to-transparent dark:from-blue-950/20 rounded-full blur-[100px]" />
+                  </div>
+
+                  {/* PART 17: UI CONTENT LAYER WITH HIGH READABILITY (Backdrop Blur & Overlay) */}
+                  <div className="relative z-10 p-6 sm:p-10 backdrop-blur-[3px] bg-white/80 dark:bg-slate-900/85 min-h-full flex flex-col justify-between">
+                    
+                    {/* Library Header & Controls */}
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-slate-800">
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200/80 dark:border-amber-800/50 text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                            <Library size={13} />
+                            <span>University Academic E-Library</span>
+                          </div>
+                          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+                            Scholarly Curriculum Repository
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Browse official course textbooks, syllabi compendiums, and accredited research volumes.
+                          </p>
+                        </div>
+
+                        {/* Back to Welcome Hub Button */}
+                        <button
+                          onClick={() => setInputType("upload")}
+                          className="self-start sm:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-xs hover:shadow-md transition-all cursor-pointer"
+                        >
+                          <ArrowRight className="w-3.5 h-3.5 rotate-180" />
+                          <span>Back to Learning Hub</span>
+                        </button>
+                      </div>
+
+                      {/* Search & Department Filters Bar */}
+                      <div className="mt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* Search Input */}
+                        <div className="relative flex-1 max-w-md">
+                          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                          <input
+                            type="text"
+                            placeholder="Search by title, author, or subject..."
+                            value={searchQuery ?? ""}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full text-xs sm:text-sm bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-xs"
+                          />
+                        </div>
+
+                        {/* Department Filters */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                          {["All", "MCA", "BCA", "Engineering", "Pharmacy", "Commerce", "Science", "Arts"].map((dept) => {
+                            const isActive = selectedDept === dept;
+                            return (
+                              <button
+                                key={dept}
+                                onClick={() => setSelectedDept(dept)}
+                                className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all shrink-0 cursor-pointer ${
+                                  isActive
+                                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
+                                    : "bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750"
+                                }`}
+                              >
+                                {dept}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Books Grid */}
+                      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {allLibraryBooks.filter(bk => {
+                          if (selectedDept !== "All" && bk.department !== selectedDept) return false;
+                          if (searchQuery.trim()) {
+                            const q = searchQuery.toLowerCase();
+                            return bk.title.toLowerCase().includes(q) || bk.author.toLowerCase().includes(q) || (bk.desc && bk.desc.toLowerCase().includes(q));
+                          }
+                          return true;
+                        }).map((bk) => {
+                          const isSelected = fileData?.fileUri === bk.id || ((bk as any).fileUri && fileData?.fileUri === (bk as any).fileUri);
+                          return (
+                            <div
+                              key={bk.id}
+                              className={`p-5 rounded-2xl bg-white dark:bg-slate-800/90 border transition-all duration-200 flex flex-col justify-between text-left shadow-sm hover:shadow-md hover:-translate-y-1 ${
+                                isSelected 
+                                  ? "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/20" 
+                                  : "border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600"
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between gap-2 mb-2">
+                                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
+                                    {bk.department}
+                                  </span>
+                                  <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                                </div>
+                                <h4 className="font-serif font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 line-clamp-2">
+                                  {bk.title}
+                                </h4>
+                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                                  Author: {bk.author}
+                                </p>
+                                {bk.desc && (
+                                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed line-clamp-3 italic">
+                                    "{bk.desc}"
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                                <button
+                                  onClick={() => {
+                                    setFileData({ fileUri: (bk as any).fileUri || bk.id, mimeType: (bk as any).mimeType || "text/plain" });
+                                    setFile(new File([], `[Library Book] ${bk.title}`));
+                                    setResultText("");
+                                    setResultType("");
+                                    setInputType("upload");
+                                  }}
+                                  className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                                    isSelected
+                                      ? "bg-emerald-600 text-white shadow-xs"
+                                      : "bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-600 hover:text-white text-indigo-600 dark:text-indigo-300"
+                                  }`}
+                                >
+                                  {isSelected ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                  <span>{isSelected ? "Active Academic Source" : "Select & Synthesize"}</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Bottom Library Environment Footer */}
+                    <div className="mt-12 pt-6 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between text-xs text-slate-400 dark:text-slate-500">
+                      <span>Curated by University Academic Board</span>
+                      <span>Open Educational Resources (OER) Standard</span>
+                    </div>
+
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/90 border border-indigo-200/80 shadow-xs text-xs font-semibold text-slate-700 backdrop-blur-sm">
-                  <FileText size={15} className="text-indigo-600" /> Handwritten Summaries
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/90 border border-amber-200/80 shadow-xs text-xs font-semibold text-slate-700 backdrop-blur-sm">
-                  <BookOpen size={15} className="text-amber-600" /> Interactive Flashcards
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/90 border border-violet-200/80 shadow-xs text-xs font-semibold text-slate-700 backdrop-blur-sm">
-                  <FileVideo size={15} className="text-violet-600" /> Smart Video Theatre
-                </div>
-              </div>
+              ) : (
+                <div className="relative min-h-[calc(100vh-6rem)] flex flex-col justify-between max-w-7xl mx-auto w-full select-text">
+                  
+                  {/* PART 12: SOPHISTICATED AMBIENT LIGHT BACKGROUND */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden select-none -z-10">
+                    <div className="absolute -top-32 -left-32 w-[520px] h-[520px] bg-indigo-200/40 dark:bg-indigo-900/20 rounded-full blur-[130px]" />
+                    <div className="absolute top-1/3 -right-24 w-[480px] h-[480px] bg-purple-200/35 dark:bg-purple-900/15 rounded-full blur-[130px]" />
+                    <div className="absolute -bottom-32 left-1/4 w-[600px] h-[600px] bg-blue-100/50 dark:bg-blue-950/20 rounded-full blur-[140px]" />
 
+                    {/* Subtle Mathematical Watermark Symbols */}
+                    <span className="absolute top-16 left-[22%] text-xs font-mono text-indigo-500/20 dark:text-indigo-400/15 select-none hidden lg:block">
+                      ∇ × E = -∂B/∂t
+                    </span>
+                    <span className="absolute bottom-28 right-[18%] text-xs font-mono text-purple-500/20 dark:text-purple-400/15 select-none hidden lg:block">
+                      ∮ B · dl = μ₀I
+                    </span>
+                    <span className="absolute top-1/2 left-4 text-xs font-mono text-indigo-400/20 select-none hidden md:block">
+                      ∑ 1/k² = π²/6
+                    </span>
+                  </div>
 
-            </div>)}
+                  {/* ========================================================================= */}
+                  {/* PART 4: TWO-COLUMN HERO SECTION (55% Left / 45% Right)                   */}
+                  {/* ========================================================================= */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center pt-2 pb-10">
+                    
+                    {/* ----------------- LEFT COLUMN (55% on Desktop) ----------------- */}
+                    <div className="lg:col-span-7 flex flex-col items-start text-left space-y-5">
+                      
+                      {/* PART 5: HERO BADGE */}
+                      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EEF2FF] dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
+                        <span className="text-xs font-semibold tracking-wider uppercase text-[#4F46E5] dark:text-indigo-300">
+                          ✦ YOUR AI LEARNING COMPANION
+                        </span>
+                      </div>
+
+                      {/* PART 6: HERO HEADING */}
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.12]">
+                        <span className="block text-[#1E1B4B] dark:text-white">Welcome to</span>
+                        <span className="bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#7C3AED] bg-clip-text text-transparent">
+                          Notivexa AI
+                        </span>
+                      </h1>
+
+                      {/* PART 7: DESCRIPTION */}
+                      <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-[560px] leading-relaxed font-normal">
+                        Your intelligent academic workspace for transforming textbooks, lectures, research papers and study material into interactive learning experiences.
+                      </p>
+
+                      {/* PART 8: CTA BUTTONS */}
+                      <div className="flex flex-wrap items-center gap-4 pt-2">
+                        {/* Start Learning Primary CTA */}
+                        <button
+                          onClick={() => {
+                            if (fileData) {
+                              generateNotes();
+                            } else {
+                              const fileInput = document.getElementById("file-upload") as HTMLInputElement;
+                              if (fileInput) fileInput.click();
+                            }
+                          }}
+                          className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white font-medium text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
+                        >
+                          <Sparkles className="w-4 h-4 text-indigo-200 group-hover:rotate-12 transition-transform" />
+                          <span>✦ Start Learning</span>
+                        </button>
+
+                        {/* Explore AI Tools Secondary CTA */}
+                        <button
+                          onClick={() => {
+                            const el = document.getElementById("notivexa-feature-grid");
+                            el?.scrollIntoView({ behavior: "smooth" });
+                          }}
+                          className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/60 hover:border-purple-400 dark:hover:border-purple-600 text-[#7C3AED] dark:text-purple-300 font-medium text-sm shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+                        >
+                          <span>Explore AI Tools</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
+
+                      {/* Micro Quality Standards */}
+                      <div className="pt-2 flex flex-wrap items-center gap-5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>Curriculum Compliant</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-indigo-500" />
+                          <span>Multi-Modal Synthesizer</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-purple-500" />
+                          <span>LaTeX & Proof Enabled</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ----------------- RIGHT COLUMN (45% on Desktop) ----------------- */}
+                    {/* PART 9: LAYERED ACADEMIC AI VISUAL (Pure CSS / Shapes / Depth)    */}
+                    <div className="lg:col-span-5 relative flex items-center justify-center min-h-[380px] select-none">
+                      
+                      {/* Orbital Rings & Ambient AI Aura */}
+                      <div className="absolute w-72 sm:w-96 h-72 sm:h-96 rounded-full border border-indigo-200/50 dark:border-indigo-900/30 animate-[spin_80s_linear_infinite]" />
+                      <div className="absolute w-60 sm:w-80 h-60 sm:h-80 rounded-full border border-purple-200/40 dark:border-purple-900/25 border-dashed" />
+
+                      {/* Main Tablet / Workspace Canvas Container */}
+                      <div className="relative w-full max-w-[420px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-indigo-100/90 dark:border-slate-800 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 hover:shadow-indigo-500/20 transition-all duration-300 animate-float-gentle">
+                        
+                        {/* Tablet Header Bar */}
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#4F46E5] to-[#7C3AED] flex items-center justify-center shadow-md shadow-indigo-500/20">
+                              <BookOpen className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-slate-800 dark:text-slate-100">Notivexa Synthesizer</div>
+                              <div className="text-[10px] text-slate-400">Academic Core v2.4</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/40">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-bold">READY</span>
+                          </div>
+                        </div>
+
+                        {/* Interactive Feature Elements Inside Tablet Canvas */}
+                        <div className="mt-4 space-y-3">
+                          {/* Slide / Presentation Deck Simulation */}
+                          <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors">
+                            <div className="flex items-center gap-2.5">
+                              <Presentation className="w-4 h-4 text-[#4F46E5]" />
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Interactive Lecture Deck</span>
+                            </div>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-200/60 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium">12 Slides</span>
+                          </div>
+
+                          {/* Handwritten Study Note Simulation */}
+                          <div className="p-3 bg-purple-50/70 dark:bg-purple-950/40 rounded-xl border border-purple-100 dark:border-purple-900/40 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950 transition-colors">
+                            <div className="flex items-center gap-2.5">
+                              <FileText className="w-4 h-4 text-[#7C3AED]" />
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Handwritten Summary</span>
+                            </div>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200/60 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-medium">Bloom L5</span>
+                          </div>
+
+                          {/* Spaced Repetition Flashcards Simulation */}
+                          <div className="p-3 bg-cyan-50/70 dark:bg-cyan-950/40 rounded-xl border border-cyan-100 dark:border-cyan-900/40 flex items-center justify-between hover:bg-cyan-50 dark:hover:bg-cyan-950 transition-colors">
+                            <div className="flex items-center gap-2.5">
+                              <Layers className="w-4 h-4 text-[#06B6D4]" />
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Flashcards Practice Deck</span>
+                            </div>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-200/60 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 font-medium">Active</span>
+                          </div>
+                        </div>
+
+                        {/* Floating Academic Badges */}
+                        <div className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 p-2.5 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400">
+                          <GraduationCap className="w-6 h-6" />
+                        </div>
+
+                        <div className="absolute -bottom-4 -left-4 bg-white dark:bg-slate-800 p-2.5 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 text-amber-500">
+                          <Lightbulb className="w-6 h-6" />
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* ========================================================================= */}
+                  {/* PART 10: 2 × 2 FEATURE TOOL GRID                                          */}
+                  {/* ========================================================================= */}
+                  <div id="notivexa-feature-grid" className="pt-8 pb-10">
+                    <div className="mb-4 text-left">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        Core Academic Modules &bull; Intelligent Synthesis
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      
+                      {/* CARD 1: AI PowerPoint Studio */}
+                      <div 
+                        onClick={() => {
+                          if (fileData) generatePPT();
+                          else {
+                            const fi = document.getElementById("file-upload") as HTMLInputElement;
+                            if (fi) fi.click();
+                          }
+                        }}
+                        className="group p-5 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 cursor-pointer text-left"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#4F46E5] dark:text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                          <Presentation className="w-5 h-5" />
+                        </div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-sm">AI PowerPoint Studio</h4>
+                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Turn your academic content into structured presentations.
+                        </p>
+                      </div>
+
+                      {/* CARD 2: Handwritten Summaries */}
+                      <div 
+                        onClick={() => {
+                          if (fileData) generateNotes();
+                          else {
+                            const fi = document.getElementById("file-upload") as HTMLInputElement;
+                            if (fi) fi.click();
+                          }
+                        }}
+                        className="group p-5 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-purple-400 dark:hover:border-purple-500 hover:-translate-y-1 transition-all duration-200 cursor-pointer text-left"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-[#7C3AED] dark:text-purple-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Handwritten Summaries</h4>
+                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Generate concise study notes with a handwritten learning style.
+                        </p>
+                      </div>
+
+                      {/* CARD 3: Interactive Flashcards */}
+                      <div 
+                        onClick={() => {
+                          if (fileData) generateFlashcards();
+                          else {
+                            const fi = document.getElementById("file-upload") as HTMLInputElement;
+                            if (fi) fi.click();
+                          }
+                        }}
+                        className="group p-5 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-cyan-400 dark:hover:border-cyan-500 hover:-translate-y-1 transition-all duration-200 cursor-pointer text-left"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-[#06B6D4] dark:text-cyan-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                          <Layers className="w-5 h-5" />
+                        </div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Interactive Flashcards</h4>
+                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Practice concepts with intelligent flashcards.
+                        </p>
+                      </div>
+
+                      {/* CARD 4: Smart Video Theatre */}
+                      <div 
+                        onClick={() => {
+                          if (fileData) generateVideoExplanation();
+                          else {
+                            const fi = document.getElementById("file-upload") as HTMLInputElement;
+                            if (fi) fi.click();
+                          }
+                        }}
+                        className="group p-5 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-pink-400 dark:hover:border-pink-500 hover:-translate-y-1 transition-all duration-200 cursor-pointer text-left"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                          <Video className="w-5 h-5" />
+                        </div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-sm">Smart Video Theatre</h4>
+                          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-pink-600 group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Learn complex topics through AI-powered video explanations.
+                        </p>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* ========================================================================= */}
+                  {/* PART 11: QUICK ACCESS BAR                                                */}
+                  {/* ========================================================================= */}
+                  <div className="pt-2 pb-6 border-t border-slate-200/60 dark:border-slate-800/80">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          QUICK ACCESS
+                        </span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Jump into your academic tools
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => {
+                            if (fileData) generateExamPaper();
+                            else {
+                              const fi = document.getElementById("file-upload") as HTMLInputElement;
+                              if (fi) fi.click();
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                        >
+                          <GraduationCap className="w-4 h-4 text-indigo-600" />
+                          <span>Exam Paper & Question Bank</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setInputType("upload");
+                            const fileInput = document.getElementById("file-upload") as HTMLInputElement;
+                            if (fileInput) fileInput.click();
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                        >
+                          <Upload className="w-4 h-4 text-purple-600" />
+                          <span>Upload Syllabus / PDF</span>
+                        </button>
+
+                        <button
+                          onClick={() => setInputType("library")}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                        >
+                          <Library className="w-4 h-4 text-cyan-600" />
+                          <span>University E-Library</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+          )}
 
 
 
@@ -3482,6 +3990,16 @@ This study companion has been successfully downloaded from your Notivexa AI Port
           onClose={() => setShowPreviewModal(false)} 
         />
       )}
+
+      {/* User Account Panel Modal */}
+      <UserAccountPanel
+        isOpen={accountPanelOpen}
+        onClose={() => setAccountPanelOpen(false)}
+        user={user}
+        isDarkMode={isDarkMode}
+        onSignOut={handleSignOut}
+        initialTab={accountPanelTab}
+      />
 </div>
   );
 }

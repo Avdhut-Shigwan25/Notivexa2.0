@@ -9,7 +9,13 @@ const pdfParse = customRequire("pdf-parse");
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
-dotenv.config();
+const serverDir = typeof __dirname !== "undefined"
+  ? __dirname
+  : path.dirname(customRequire.resolve("./server.ts"));
+const envDir = fs.existsSync(path.join(serverDir, ".env"))
+  ? serverDir
+  : path.resolve(serverDir, "..");
+dotenv.config({ path: path.join(envDir, ".env") });
 
 const app = express();
 const PORT = 3000;
